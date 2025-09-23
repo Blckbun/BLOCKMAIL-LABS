@@ -7,7 +7,11 @@ import {
 import { getFullnodeUrl } from '@mysten/sui/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
-const WalletConnectionContext = ({ children }: any) => {
+type props = {
+	children: React.ReactNode
+}
+
+const WalletConnectionContext = ({ children }: props) => {
 	const { networkConfig } = createNetworkConfig({
 		testnet: { url: getFullnodeUrl('testnet') },
 	})
