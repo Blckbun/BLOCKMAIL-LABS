@@ -19,18 +19,19 @@ import {
   Copy,
   CheckCircle
 } from 'lucide-react';
+import { useCurrentAccount } from '@mysten/dapp-kit'
 
 export default function ProfilePage() {
-  const [walletAddress] = useState('0x1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t');
+  const currentAccount = useCurrentAccount()
   const [displayName, setDisplayName] = useState('');
   const [notifications, setNotifications] = useState(true);
   const [publicProfile, setPublicProfile] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopyAddress = () => {
-    navigator.clipboard.writeText(walletAddress);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(currentAccount?.address || '')
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   };
 
   const stats = [
@@ -97,7 +98,7 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-center space-x-2 bg-gray-700/50 p-2 rounded-lg">
                     <Wallet className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-300 font-mono">
-                      {`${walletAddress.slice(0, 8)}...${walletAddress.slice(-6)}`}
+                      {`${currentAccount?.address.slice(0, 9)}...${currentAccount?.address.slice(-9)}`}
                     </span>
                     <Button
                       size="sm"
@@ -170,7 +171,7 @@ export default function ProfilePage() {
                       <Input
                         id="displayName"
                         value={displayName}
-                        onChange={(e:any) => setDisplayName(e.target.value)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)}
                         placeholder="Enter display name..."
                         className="bg-gray-700 border-gray-600 text-white"
                       />

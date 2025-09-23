@@ -107,7 +107,7 @@ export default function SponsorsPage() {
             Become a Founding Sponsor
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Support the future of decentralized communication and earn a permanent share of BlockMail's revenue. 
+            Support the future of decentralized communication and earn a permanent share from your revenue. 
             Join our founding sponsors and help build the Web3 email revolution.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

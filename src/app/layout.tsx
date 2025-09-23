@@ -1,7 +1,10 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import './globals.css'
 import NavBar from '@/components/navbar'
+import Footer from '@/components/footer'
+import '@mysten/dapp-kit/dist/index.css'
+import './globals.css'
+import WalletConnectionContext from '@/contexts/walletcontext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,11 +20,14 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en">
-			<body className={inter.className}>
-				<NavBar />
-				<main>{children}</main>
-			</body>
-		</html>
+		<WalletConnectionContext>
+			<html lang="en">
+				<body className={inter.className}>
+					<NavBar />
+					<main>{children}</main>
+					<Footer />
+				</body>
+			</html>
+		</WalletConnectionContext>
 	)
 }

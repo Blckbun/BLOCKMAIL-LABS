@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
@@ -98,7 +98,7 @@ export default function MailboxPage() {
                   <Input
                     id="fee"
                     value={payToSendFee}
-                    onChange={(e:any) => setPayToSendFee(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPayToSendFee(e.target.value)}
                     className="bg-gray-700 border-gray-600 text-white"
                     placeholder="0.1"
                   />
