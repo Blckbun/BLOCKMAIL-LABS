@@ -18,6 +18,7 @@ import {
   Calendar,
   User
 } from 'lucide-react';
+import ComposeNewMail from '@/components/composeNewMail'
 
 export default function MailboxPage() {
   const [payToSendFee, setPayToSendFee] = useState('0.1');
@@ -219,58 +220,7 @@ export default function MailboxPage() {
               </TabsContent>
 
               <TabsContent value="compose" className="space-y-4">
-                <Card className="bg-gray-800/50 border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-cyan-400">
-                      <Send className="w-5 h-5 mr-2" />
-                      Compose New Message
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <Label htmlFor="recipient">Recipient Wallet Address</Label>
-                      <Input
-                        id="recipient"
-                        placeholder="0x..."
-                        className="bg-gray-700 border-gray-600 text-white"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="subject">Subject</Label>
-                      <Input
-                        id="subject"
-                        placeholder="Enter subject..."
-                        className="bg-gray-700 border-gray-600 text-white"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="message">Message</Label>
-                      <Textarea
-                        id="message"
-                        placeholder="Type your encrypted message..."
-                        className="bg-gray-700 border-gray-600 text-white min-h-32"
-                      />
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-700/50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Lock className="w-4 h-4 text-green-400" />
-                        <span className="text-sm text-green-400">Message will be encrypted</span>
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        Fee required: 0.1 SUI
-                      </div>
-                    </div>
-                    <div className="flex space-x-4">
-                      <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-none">
-                        <Send className="w-4 h-4 mr-2" />
-                        Send Message
-                      </Button>
-                      <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
-                        Save Draft
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ComposeNewMail />
               </TabsContent>
             </Tabs>
           </div>
