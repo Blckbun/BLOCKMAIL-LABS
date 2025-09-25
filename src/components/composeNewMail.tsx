@@ -68,7 +68,6 @@ const ComposeNewMail = () => {
 					await setTxHash(resp.digest)
 
 					const sender = account.address
-					const publicKey = account.publicKey // available from dapp-kit
 					const subject = (
 						document.getElementById('subject') as HTMLInputElement
 					).value
@@ -91,7 +90,7 @@ const ComposeNewMail = () => {
 						try {
 							// Example: Store a string as a blob
 							const res = await fetch(
-								`https://publisher.walrus-testnet.walrus.space/v1/blobs?send_object_to=${sender}`,
+								`https://publisher.walrus-testnet.walrus.space/v1/blobs?send_object_to=${recipient}`,
 								{
 									method: 'PUT',
 									body: messageBytes,
