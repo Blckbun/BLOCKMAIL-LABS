@@ -41,11 +41,12 @@ const ComposeNewMail = () => {
 			alert('Please connect your wallet first.')
 			return
 		}
+		const recipient = (
+						document.getElementById('recipient') as HTMLInputElement
+					).value
 
 		// 1. Create a transaction
 		const tx = new Transaction()
-		const recipient =
-			'0xb0c6f9fdfcdf62499f9576941eb5f53120c8fa717c73005f0f23db83c8a5f9be' // Replace with receiver wallet
 		const suiAmount: number = 0.01 // in SUI
 		const amount = BigInt(suiAmount * 1_000_000_000) // convert to MIST
 
