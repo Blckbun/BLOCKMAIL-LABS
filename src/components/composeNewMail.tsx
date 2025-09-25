@@ -1,5 +1,3 @@
-'use client'
-
 import {
 	useSignAndExecuteTransaction,
 	useCurrentAccount,
@@ -104,15 +102,13 @@ const ComposeNewMail = () => {
 							)
 							const data = await res.json()
 							console.log(data)
-						} catch (e: any) {
-							console.error('Walrus write failed:', e)
-							return
+						} catch (e: string | { message: string } | any) {
+							return typeof e === 'string' ? e : e.message
 						}
 
 						return
-					} catch (err: any) {
-						console.error('General error in :', err)
-						return err
+					} catch (err: string | { message: string } | any) {
+						return typeof err === 'string' ? err : err.message
 					}
 				},
 				onError: (err) => {
