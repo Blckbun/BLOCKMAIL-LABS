@@ -1,7 +1,6 @@
 import { Card, CardContent } from './ui/card'
-import { Input } from './ui/input'
 import { Badge } from './ui/badge'
-import { Search, Lock, User } from 'lucide-react'
+import { Lock, User } from 'lucide-react'
 import { InboxMessage } from '@/libs/types'
 
 const Inbox = ({ inboxMessages }: { inboxMessages: InboxMessage[] }) => {

@@ -10,20 +10,17 @@ import {
 	CardHeader,
 	CardTitle,
 } from '../../components/ui/card'
-import { Input } from '../../components/ui/input'
-import { Label } from '../../components/ui/label'
 import {
 	Tabs,
 	TabsContent,
 	TabsList,
 	TabsTrigger,
 } from '../../components/ui/tabs'
-import { Mail, Settings, Plus, DollarSign } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import ComposeNewMail from '@/components/composeNewMail'
 import { InboxMessage } from '@/libs/types'
 
 export default function MailboxPage() {
-	const [payToSendFee, setPayToSendFee] = useState('0.1')
 	const [composeOpen, setComposeOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState<boolean>(true)
 	const [inboxMessages, setInboxMessages] = useState<InboxMessage[]>([])
@@ -91,7 +88,7 @@ export default function MailboxPage() {
 			console.log('📩 Inbox messages:', inboxMessages)
 		}
 		fetchInbox().then(() => setIsLoading(false))
-	}, [account?.address])
+	}, [account.address])
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 pt-20">

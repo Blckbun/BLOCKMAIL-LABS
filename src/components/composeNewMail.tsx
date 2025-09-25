@@ -10,31 +10,11 @@ import { Input } from './ui/input'
 import { Textarea } from './ui/textarea'
 import { Label } from './ui/label'
 import { Send, Lock } from 'lucide-react'
-import { SuiClient, getFullnodeUrl } from '@mysten/sui/client'
-import { WalrusClient } from '@mysten/walrus'
-import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519'
-
-const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') })
-
-const walrusClient = new WalrusClient({
-	network: 'testnet',
-	suiClient,
-})
 
 const ComposeNewMail = () => {
 	const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction()
 	const account = useCurrentAccount()
 	const [txHash, setTxHash] = useState<string | null>(null)
-
-	// Small helper to convert hex → Uint8Array
-	function hexToBytes(hex: string): Uint8Array {
-		return Uint8Array.from(
-			hex
-				.replace(/^0x/, '')
-				.match(/.{1,2}/g)!
-				.map((b) => parseInt(b, 16))
-		)
-	}
 
 	async function handleSend() {
 		if (!account) {
@@ -102,13 +82,19 @@ const ComposeNewMail = () => {
 							)
 							const data = await res.json()
 							console.log(data)
-						} catch (e: string | { message: string } | any) {
-							return typeof e === 'string' ? e : e.message
+						} catch (e: unknown) {
+							if (e instanceof Error) {
+								console.error('Error storing message:', e.message)
+							}
+							return 'An unknown error occurred.'
 						}
 
 						return
-					} catch (err: string | { message: string } | any) {
-						return typeof err === 'string' ? err : err.message
+					} catch (err: unknown) {
+						if (err instanceof Error) {
+							console.error('Error encoding message:', err.message)
+						}
+						return 'An unknown error occurred.'
 					}
 				},
 				onError: (err) => {
