@@ -3,60 +3,20 @@ import React, { useState } from 'react'
 import { Button } from '../../components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
-import { Textarea } from '../../components/ui/textarea'
 import { Label } from '../../components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { Badge } from '../../components/ui/badge'
 import { 
   Mail, 
-  Send, 
   Settings, 
-  Search, 
   Plus,
-  Lock,
   DollarSign,
-  Calendar,
-  User
-} from 'lucide-react';
+} from 'lucide-react'
 import ComposeNewMail from '@/components/composeNewMail'
+import Inbox from '@/components/inbox'
 
 export default function MailboxPage() {
   const [payToSendFee, setPayToSendFee] = useState('0.1');
   const [composeOpen, setComposeOpen] = useState(false);
-
-  // Mock email data
-  const emails = [
-    {
-      id: 1,
-      from: '0x123...abc',
-      subject: 'DAO Governance Proposal #42',
-      preview: 'Vote on the new treasury allocation proposal...',
-      timestamp: '2h ago',
-      fee: '0.1 SUI',
-      encrypted: true,
-      read: false
-    },
-    {
-      id: 2,
-      from: '0x456...def',
-      subject: 'Welcome to Web3 Conference',
-      preview: 'Thank you for registering for the upcoming conference...',
-      timestamp: '1d ago',
-      fee: '0.05 SUI',
-      encrypted: true,
-      read: true
-    },
-    {
-      id: 3,
-      from: '0x789...ghi',
-      subject: 'NFT Collection Update',
-      preview: 'New drops available in our marketplace...',
-      timestamp: '3d ago',
-      fee: '0.2 SUI',
-      encrypted: true,
-      read: true
-    }
-  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 pt-20">
@@ -151,56 +111,7 @@ export default function MailboxPage() {
               </TabsList>
 
               <TabsContent value="inbox" className="space-y-4">
-                {/* Search */}
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                  <Input
-                    placeholder="Search messages..."
-                    className="pl-10 bg-gray-800/50 border-gray-700 text-white"
-                  />
-                </div>
-
-                {/* Email List */}
-                <div className="space-y-3">
-                  {emails.map((email) => (
-                    <Card 
-                      key={email.id} 
-                      className={`bg-gray-800/50 border-gray-700 hover:bg-gray-800/70 cursor-pointer transition-colors ${
-                        !email.read ? 'border-cyan-500/50' : ''
-                      }`}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 space-y-2">
-                            <div className="flex items-center space-x-3">
-                              <div className="flex items-center space-x-2">
-                                <User className="w-4 h-4 text-gray-400" />
-                                <span className="text-sm text-gray-400">{email.from}</span>
-                              </div>
-                              {email.encrypted && (
-                                <Badge variant="secondary" className="bg-green-600/20 text-green-400 border-green-600/50">
-                                  <Lock className="w-3 h-3 mr-1" />
-                                  Encrypted
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className="border-cyan-600/50 text-cyan-400">
-                                {email.fee}
-                              </Badge>
-                            </div>
-                            <h3 className={`${!email.read ? 'text-white font-semibold' : 'text-gray-300'}`}>
-                              {email.subject}
-                            </h3>
-                            <p className="text-gray-400 text-sm">{email.preview}</p>
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-400">
-                            <Calendar className="w-4 h-4" />
-                            <span>{email.timestamp}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <Inbox />
               </TabsContent>
 
               <TabsContent value="sent" className="space-y-4">
