@@ -88,7 +88,7 @@ export default function MailboxPage() {
 			console.log('📩 Inbox messages:', inboxMessages)
 		}
 		fetchInbox().then(() => setIsLoading(false))
-	}, [account.address])
+	}, [account?.address])
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 pt-20">
