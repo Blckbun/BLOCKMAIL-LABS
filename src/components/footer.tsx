@@ -6,10 +6,16 @@ const Footer = ()=>{
 					<div className="flex items-center justify-center space-x-2 mb-4">
 						<span className="text-gray-400">Powered by</span>
 						<Image
-							src="/sui.webp"
+							src="/walrus.svg"
 							alt="Sui Logo"
 							width={80}
 							height={20}
+						/>
+						<Image
+							src="/sui.svg"
+							alt="Sui Logo"
+							width={45}
+							height={10}
 						/>
 					</div>
 					<p className="text-gray-500">

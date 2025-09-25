@@ -1,142 +1,254 @@
 'use client'
 import React, { useState } from 'react'
+import { SuiClient, getFullnodeUrl } from '@mysten/sui/client'
+import { useCurrentAccount } from '@mysten/dapp-kit'
+import { useEffect } from 'react'
 import { Button } from '../../components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from '../../components/ui/card'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
-import { 
-  Mail, 
-  Settings, 
-  Plus,
-  DollarSign,
-} from 'lucide-react'
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from '../../components/ui/tabs'
+import { Mail, Settings, Plus, DollarSign } from 'lucide-react'
 import ComposeNewMail from '@/components/composeNewMail'
-import Inbox from '@/components/inbox'
+import { InboxMessage } from '@/libs/types'
 
 export default function MailboxPage() {
-  const [payToSendFee, setPayToSendFee] = useState('0.1');
-  const [composeOpen, setComposeOpen] = useState(false);
+	const [payToSendFee, setPayToSendFee] = useState('0.1')
+	const [composeOpen, setComposeOpen] = useState(false)
+	const [isLoading, setIsLoading] = useState<boolean>(true)
+	const [inboxMessages, setInboxMessages] = useState<InboxMessage[]>([])
+	const account = useCurrentAccount()
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 pt-20">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
-          <div>
-            <h1 className="text-3xl mb-2">Mailbox</h1>
-            <p className="text-gray-400">Your decentralized inbox on Sui blockchain</p>
-          </div>
-          <div className="flex space-x-4">
-            <Button 
-              onClick={() => setComposeOpen(true)}
-              className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-none"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Compose
-            </Button>
-            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </Button>
-          </div>
-        </div>
+	const client = new SuiClient({ url: getFullnodeUrl('testnet') })
+	/**
+	 * Fetch and decode inbox messages for a user.
+	 */
+	async function getInboxMessages(ownerAddress: string) {
+		// 1. Get all objects owned by this wallet
+		const owned = await client.getOwnedObjects({
+			owner: ownerAddress,
+			options: { showContent: true, showType: true },
+		})
 
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Fee Settings */}
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardHeader>
-                <CardTitle className="flex items-center text-cyan-400">
-                  <DollarSign className="w-5 h-5 mr-2" />
-                  Pay-to-Send Fee
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="fee">Current Fee (SUI)</Label>
-                  <Input
-                    id="fee"
-                    value={payToSendFee}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPayToSendFee(e.target.value)}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="0.1"
-                  />
-                </div>
-                <p className="text-sm text-gray-400">
-                  This fee prevents spam and is required for others to send you messages.
-                </p>
-                <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">
-                  Update Fee
-                </Button>
-              </CardContent>
-            </Card>
+		// 2. Filter Walrus blobs (by type name)
+		const walrusObjs = owned.data.filter((obj) => {
+			return obj.data?.type?.includes('blob::Blob')
+		})
 
-            {/* Stats */}
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-cyan-400">Inbox Stats</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Total Messages</span>
-                  <span>27</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Unread</span>
-                  <span className="text-cyan-400">3</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Fees Earned</span>
-                  <span className="text-green-400">2.7 SUI</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+		const messages: InboxMessage[] = []
 
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="inbox" className="space-y-6">
-              <TabsList className="bg-gray-800 border-gray-700">
-                <TabsTrigger value="inbox" className="data-[state=active]:bg-gray-700">
-                  Inbox
-                </TabsTrigger>
-                <TabsTrigger value="sent" className="data-[state=active]:bg-gray-700">
-                  Sent
-                </TabsTrigger>
-                <TabsTrigger value="compose" className="data-[state=active]:bg-gray-700">
-                  Compose
-                </TabsTrigger>
-              </TabsList>
+		// 3. For each Walrus blob → fetch, decrypt, decode
+		for (const obj of walrusObjs) {
+			try {
+				const objectId = obj?.data?.objectId
+				if (!objectId) continue
 
-              <TabsContent value="inbox" className="space-y-4">
-                <Inbox />
-              </TabsContent>
+				// 3a. Fetch blob bytes from Walrus storage node
+				const resp = await fetch(
+					`https://aggregator.walrus-testnet.walrus.space/v1/blobs/by-object-id/${objectId}`
+				)
+				if (!resp.ok) throw new Error(`Failed to fetch blob ${objectId}`)
+				const encryptedBytes = new Uint8Array(await resp.arrayBuffer())
 
-              <TabsContent value="sent" className="space-y-4">
-                <Card className="bg-gray-800/50 border-gray-700">
-                  <CardContent className="p-8 text-center">
-                    <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-xl mb-2">No sent messages</h3>
-                    <p className="text-gray-400 mb-4">Start composing your first encrypted message</p>
-                    <Button 
-                      onClick={() => setComposeOpen(true)}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-none"
-                    >
-                      Compose Message
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+				// 3c. Decode bytes → string → object
+				const decoder = new TextDecoder()
+				const messageString = decoder.decode(encryptedBytes)
 
-              <TabsContent value="compose" className="space-y-4">
-                <ComposeNewMail />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+				try {
+					const parsed = JSON.parse(messageString)
+					if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+						messages.push({
+							objectId,
+							message: parsed,
+						})
+					}
+				} catch {
+					// If it’s not JSON → skip
+					continue
+				}
+			} catch (err) {
+				console.error('Failed to process Walrus blob', err)
+			}
+		}
+		return messages
+	}
+
+	useEffect(() => {
+		async function fetchInbox() {
+			if (account === null) return
+			const allInboxMessages = await getInboxMessages(account.address)
+			setInboxMessages(allInboxMessages)
+			console.log('📩 Inbox messages:', inboxMessages)
+		}
+		fetchInbox().then(() => setIsLoading(false))
+	}, [account?.address])
+
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white p-6 pt-20">
+			<div className="max-w-7xl mx-auto">
+				{/* Header */}
+				<div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
+					<div>
+						<h1 className="text-3xl mb-2">Mailbox</h1>
+						<p className="text-gray-400">
+							Your decentralized inbox on Sui blockchain
+						</p>
+					</div>
+					<div className="flex space-x-4">
+						{/* <Button
+							onClick={() => setComposeOpen(true)}
+							variant="primary"
+						>
+							<Plus className="w-4 h-4 mr-2" />
+							Compose
+						</Button> */}
+						{/* <Button
+							variant="outline"
+							className="border-gray-600 text-gray-300 hover:bg-gray-800"
+						>
+							<Settings className="w-4 h-4 mr-2" />
+							Settings
+						</Button> */}
+					</div>
+				</div>
+
+				<div className="grid lg:grid-cols-4 gap-6">
+					{/* Sidebar */}
+					<div className="lg:col-span-1 space-y-6">
+						{/* Fee Settings */}
+						{/* <Card className="bg-gray-800/50 border-gray-700">
+							<CardHeader>
+								<CardTitle className="flex items-center text-cyan-400">
+									<DollarSign className="w-5 h-5 mr-2" />
+									Pay-to-Send Fee
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<div>
+									<Label htmlFor="fee">Current Fee (SUI)</Label>
+									<Input
+										id="fee"
+										value={payToSendFee}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+											setPayToSendFee(e.target.value)
+										}
+										className="bg-gray-700 border-gray-600 text-white"
+										placeholder="0.1"
+									/>
+								</div>
+								<p className="text-sm text-gray-400">
+									This fee prevents spam and is required for others to send you
+									messages.
+								</p>
+								<Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700">
+									Update Fee
+								</Button>
+							</CardContent>
+						</Card> */}
+
+						{/* Stats */}
+						<Card className="bg-gray-800/50 border-gray-700">
+							<CardHeader>
+								<CardTitle className="text-cyan-400">Inbox Stats</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-3">
+								<div className="flex justify-between">
+									<span className="text-gray-400">Total Messages</span>
+									<span>{inboxMessages.length}</span>
+								</div>
+								{/* <div className="flex justify-between">
+									<span className="text-gray-400">Unread</span>
+									<span className="text-cyan-400">3</span>
+								</div> */}
+								<div className="flex justify-between">
+									<span className="text-gray-400">Fees Earned</span>
+									<span className="text-green-400">{inboxMessages.length * 0.1} SUI</span>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+					{/* Main Content */}
+					<div className="lg:col-span-3">
+						<Tabs
+							defaultValue="inbox"
+							className="space-y-6"
+						>
+							<TabsList className="bg-gray-800 border-gray-700">
+								<TabsTrigger
+									value="inbox"
+									className="data-[state=active]:bg-gray-700"
+								>
+									Inbox
+								</TabsTrigger>
+								{/* <TabsTrigger
+									value="sent"
+									className="data-[state=active]:bg-gray-700"
+								>
+									Sent
+								</TabsTrigger> */}
+								<TabsTrigger
+									value="compose"
+									className="data-[state=active]:bg-gray-700"
+								>
+									Compose
+								</TabsTrigger>
+							</TabsList>
+
+							<TabsContent
+								value="inbox"
+								className="space-y-4"
+							>
+								{isLoading ? (
+									<p>Loading...</p>
+								) : (
+									<Inbox inboxMessages={inboxMessages} />
+								)}
+							</TabsContent>
+
+							<TabsContent
+								value="sent"
+								className="space-y-4"
+							>
+								<Card className="bg-gray-800/50 border-gray-700">
+									<CardContent className="p-8 text-center">
+										<Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+										<h3 className="text-xl mb-2">No sent messages</h3>
+										<p className="text-gray-400 mb-4">
+											Start composing your first encrypted message
+										</p>
+										<Button
+											onClick={() => setComposeOpen(true)}
+											className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-none"
+										>
+											Compose Message
+										</Button>
+									</CardContent>
+								</Card>
+							</TabsContent>
+
+							<TabsContent
+								value="compose"
+								className="space-y-4"
+							>
+								<ComposeNewMail />
+							</TabsContent>
+						</Tabs>
+					</div>
+				</div>
+			</div>
+		</div>
+	)
 }
+
+import Inbox from '@/components/inbox'

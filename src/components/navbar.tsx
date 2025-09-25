@@ -21,7 +21,7 @@ export default function NavBar() {
 
 	const navLinks: NavigationLink[] = [
 		{ href: '/', label: 'Home' },
-		{ href: '/profile', label: 'Profile' },
+		// { href: '/profile', label: 'Profile' },
 		{ href: '/mailbox', label: 'Mailbox' },
 		{ href: '/sponsors', label: 'Sponsors' },
 	]
